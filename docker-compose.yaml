@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-qa
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: youruser
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: yourdb
+    volumes:
+      - postgres_qa_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_qa_data:
