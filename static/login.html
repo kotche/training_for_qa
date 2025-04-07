@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+</head>
+<body>
+<h2>Вход в систему</h2>
+<form id="login-form">
+    <label>
+        Логин:
+        <input type="text" id="login" required>
+    </label>
+    <br><br>
+    <label>
+        Пароль:
+        <input type="password" id="password" required>
+    </label>
+    <br><br>
+    <button type="submit">Войти</button>
+</form>
+
+<p id="result"></p>
+
+<script>
+    const form = document.getElementById('login-form');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const login = document.getElementById('login').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+
+            const text = await res.text();
+            if (res.ok) {
+                document.body.innerHTML = `<h2>Добро пожаловать, ${login}!</h2>`;
+            } else {
+                result.textContent = `Ошибка: ${res.status} - ${text}`;
+            }
+        } catch (err) {
+            result.textContent = 'Ошибка запроса: ' + err.message;
+        }
+    });
+</script>
+</body>
+</html>
