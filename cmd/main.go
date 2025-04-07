@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"regexp"
@@ -19,6 +20,11 @@ type RegisterRequest struct {
 
 type Response struct {
 	Message string `json:"message"`
+}
+
+type LoginRequest struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 func main() {
@@ -38,6 +44,7 @@ func main() {
 	}
 
 	http.HandleFunc("/register", registerHandler)
+	http.HandleFunc("/login", loginHandler)
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
@@ -67,7 +74,35 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Response{Message: "Пользователь успешно зарегистрирован"})
 }
 
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Неверный JSON", http.StatusBadRequest)
+		return
+	}
+
+	var password string
+	err := db.QueryRow("SELECT password FROM users WHERE login=$1", req.Login).Scan(&password)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "Пользователь не найден", http.StatusUnauthorized)
+		} else {
+			http.Error(w, "Ошибка поиска пользователя", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// bug
+	if req.Password != "" && password != req.Password {
+		http.Error(w, "Неверный пароль", http.StatusUnauthorized)
+		return
+	}
+
+	json.NewEncoder(w).Encode(Response{Message: "Успешный вход"})
+}
+
 func isValidPassword(pw string) bool {
+	// bug
 	if len(pw) < 7 {
 		return false
 	}

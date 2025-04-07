@@ -9,5 +9,10 @@
 >docker exec -it postgres_qa psql -U youruser -d yourdb  (вызвать напрямую pg из контейнера)      
 >psql -h localhost -p 5433 -U youruser -d yourdb 
 
-### Версия 1
-При заходе на http://localhost:8080/ показывает форму регистрации
+Тестировать по пути http://localhost:8080/   
+
+### Версия 1   
+register.html - форма регистрации    
+
+### Версия 2   
+login.html - форма входа в систему   
